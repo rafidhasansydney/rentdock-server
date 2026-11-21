@@ -11,6 +11,7 @@
     "db:check": "node scripts/check-database.mjs",
     "db:verify": "node scripts/check-database.mjs --write",
     "phase:verify": "node scripts/verify-foundation.mjs",
+    "auth:verify": "node scripts/verify-authentication.mjs",
     "stripe:setup": "node scripts/setup-stripe-sandbox.mjs",
     "stripe:check": "node scripts/check-stripe.mjs",
     "stripe:verify": "node scripts/check-stripe.mjs"
@@ -19,9 +20,12 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
+    "@better-auth/mongo-adapter": "1.7.27",
+    "better-auth": "1.7.27",
     "cors": "2.8.6",
     "dotenv": "17.4.2",
     "express": "5.3.0",
+    "jose": "6.2.18",
     "mongodb": "7.9.1"
   }
 }

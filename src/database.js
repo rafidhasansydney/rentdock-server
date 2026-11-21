@@ -54,7 +54,7 @@ export function createDatabaseService({ uri, name, createClient = (value, option
     return closing;
   }
 
-  return Object.freeze({ connect, ping, close });
+  return Object.freeze({ connect, ping, close, getClient: () => client });
 }
 
 export const databaseService = createDatabaseService({ uri: config.mongoUri, name: config.mongoDb });

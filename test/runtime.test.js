@@ -48,7 +48,7 @@ test("runtime waits for database startup and closes the database exactly once", 
   let closes = 0;
   const pending = new Promise(resolve => { finishConnection = resolve; });
   let listening = false;
-  const starting = startServer({ port: 0, host: "127.0.0.1", database: {
+  const starting = startServer({ port: 0, host: "127.0.0.1", authenticationFactory: null, database: {
     connect: async () => { connects++; await pending; },
     ping: async () => {}, close: async () => { closes++; },
   } }).then(runtime => { listening = true; return runtime; });
@@ -74,7 +74,7 @@ test("runtime releases the database if binding the HTTP port fails", async () =>
   await new Promise(resolve => occupied.listen(0, "127.0.0.1", resolve));
   let closed = false;
   try {
-    await assert.rejects(startServer({ port: occupied.address().port, host: "127.0.0.1", database: {
+    await assert.rejects(startServer({ port: occupied.address().port, host: "127.0.0.1", authenticationFactory: null, database: {
       connect: async () => {}, close: async () => { closed = true; },
     } }), { code: "EADDRINUSE" });
     assert.equal(closed, true);
