@@ -5,8 +5,10 @@ import { notFound, errorHandler } from "./errors.js";
 import { databaseService } from "./database.js";
 import { toNodeHandler } from "better-auth/node";
 import { createAccountRoutes } from "./auth/routes.js";
+import { createCatalogRepository } from "./catalog/repository.js";
+import { createCatalogRoutes } from "./catalog/routes.js";
 
-export function createApp({ database = databaseService, isShuttingDown = () => false, authentication } = {}) {
+export function createApp({ database = databaseService, isShuttingDown = () => false, authentication, catalog = createCatalogRepository(database) } = {}) {
   const app = express();
   const settings = authentication?.settings ?? config;
   app.disable("x-powered-by");
@@ -18,7 +20,7 @@ export function createApp({ database = databaseService, isShuttingDown = () => f
       callback(error);
     },
     credentials: true,
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   }));
   app.get("/api/auth-config", (req, res) => {
     res.set("Cache-Control", "no-store");
@@ -26,6 +28,7 @@ export function createApp({ database = databaseService, isShuttingDown = () => f
   });
   if (authentication) app.all("/api/auth/{*splat}", toNodeHandler(authentication.auth));
   app.use(express.json({ limit: "100kb" }));
+  app.use("/api", createCatalogRoutes({ catalog, authentication }));
   if (authentication) app.use("/api", createAccountRoutes({ auth: authentication.auth, settings: authentication.settings }));
   app.get("/api/health", (req, res) => {
     res.set("Cache-Control", "no-store");

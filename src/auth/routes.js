@@ -5,7 +5,7 @@ import { profileError, publicUser } from "./policy.js";
 export function createAccountRoutes({ auth, settings }) {
   const router = Router();
   const permissions = createAuthorization({ auth, settings });
-  router.use(permissions.verifyToken);
+  router.use(["/profile", "/dashboard"], permissions.verifyToken);
   router.get("/profile", (req, res) => res.json({ user: req.user }));
   router.patch("/profile", async (req, res) => {
     const fields = ["name", "image", "phone", "address"];

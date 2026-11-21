@@ -9,7 +9,17 @@ test("real Better Auth registration, JWT, fresh roles, profile and logout enforc
   const store = { user: [], session: [], account: [], verification: [], jwks: [], rateLimit: [] };
   const settings = { authBaseUrl: "http://127.0.0.1:3000/api/auth", clientOrigin: "http://127.0.0.1:3000", authSecret: "test-secret-".repeat(5), googleClientId: "", googleClientSecret: "" };
   const authentication = await createAuthentication({ adapter: memoryAdapter(store), settings });
-  const server = createServer(createApp({ authentication, database: { ping: async () => {} } }));
+  const favoriteUsers = [];
+  let detailCalls = 0;
+  const catalog = {
+    list: async () => ({ items: [], total: 0 }),
+    details: async id => { detailCalls++; return id === "camera" ? { id, name: "Camera" } : null; },
+    favoriteStatus: async () => false,
+    addFavorite: async userId => { favoriteUsers.push(userId); return true; },
+    removeFavorite: async userId => { favoriteUsers.push(userId); },
+    favorites: async userId => { favoriteUsers.push(userId); return { items: [], total: 0 }; },
+  };
+  const server = createServer(createApp({ authentication, catalog, database: { ping: async () => {} } }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
   const jar = new Map();
@@ -32,6 +42,13 @@ test("real Better Auth registration, JWT, fresh roles, profile and logout enforc
     return { status: response.status, body: payload };
   }
   try {
+    assert.equal((await call("/health")).status, 200);
+    assert.equal((await call("/ready")).status, 200);
+    assert.equal((await call("/missing-public-api")).status, 404);
+    assert.equal((await call("/equipment")).status, 200);
+    assert.equal((await call("/equipment/camera")).status, 401);
+    assert.equal(detailCalls, 0);
+    assert.equal((await call("/equipment?status=pending")).status, 400);
     const details = { name: "Test Customer", email: "phase3@example.com", image: "https://images.example/avatar.png", password: "Abc12345" };
     assert.equal((await call("/auth/sign-up/email", { body: { ...details, password: "weakpass" } })).status, 400);
     const registration = await call("/auth/sign-up/email", { body: details });
@@ -42,6 +59,12 @@ test("real Better Auth registration, JWT, fresh roles, profile and logout enforc
     assert.equal(issued.status, 200, JSON.stringify(issued.body));
     const token = issued.body.token;
     assert.equal((await call("/profile", { token })).status, 200);
+    assert.equal((await call("/equipment/camera", { token })).status, 200);
+    assert.equal((await call("/equipment/pending", { token })).status, 404);
+    assert.equal((await call("/favorites/camera", { token, method: "PUT", body: { userId: "another-account" } })).status, 200);
+    assert.equal((await call("/favorites", { token })).status, 200);
+    assert.equal((await call("/favorites/camera", { token, method: "DELETE" })).status, 200);
+    assert.deepEqual(favoriteUsers, Array(3).fill(registration.body.user.id));
     assert.equal((await call("/profile", { token, cookie: false })).status, 401);
     assert.equal((await call("/profile", { token: `${token.slice(0, -6)}abcdef` })).status, 401);
     assert.equal((await call("/dashboard/customer", { token })).status, 200);
@@ -54,6 +77,7 @@ test("real Better Auth registration, JWT, fresh roles, profile and logout enforc
     assert.equal(saved.body.user.phone, "01712345678");
     const context = await authentication.auth.$context;
     await context.internalAdapter.updateUser(registration.body.user.id, { role: "owner" });
+    assert.equal((await call("/favorites/camera", { token, method: "PUT" })).status, 403);
     assert.equal((await call("/dashboard/owner", { token })).status, 200);
     assert.equal((await call("/dashboard/customer", { token })).status, 403);
     await context.internalAdapter.updateUser(registration.body.user.id, { role: "admin" });

@@ -3,19 +3,22 @@ import { createApp } from "./app.js";
 import { config } from "./config.js";
 import { databaseService } from "./database.js";
 import { createAuthentication } from "./auth/authentication.js";
+import { createCatalogRepository } from "./catalog/repository.js";
 
 export async function startServer({ database = databaseService, port = config.port, host = config.host, drainTimeoutMS = 5000, authenticationFactory = createAuthentication } = {}) {
   let shuttingDown = false;
   let stopping;
   const connectedDatabase = await database.connect();
   let authentication;
+  const catalog = createCatalogRepository(database);
   try {
     authentication = authenticationFactory ? await authenticationFactory({ database: connectedDatabase, client: database.getClient?.() }) : undefined;
+    if (connectedDatabase?.collection) await catalog.ensureIndexes();
   } catch (error) {
     await database.close();
     throw error;
   }
-  const server = createServer(createApp({ database, authentication, isShuttingDown: () => shuttingDown }));
+  const server = createServer(createApp({ database, authentication, catalog, isShuttingDown: () => shuttingDown }));
   try {
     await new Promise((resolve, reject) => {
       server.once("error", reject);
