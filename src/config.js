@@ -6,4 +6,8 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("PORT m
 const clientUrl = process.env.CLIENT_URL ?? "http://127.0.0.1:3000";
 const parsedClientUrl = new URL(clientUrl);
 if (!["http:", "https:"].includes(parsedClientUrl.protocol)) throw new Error("CLIENT_URL must be an HTTP or HTTPS URL.");
-export const config = Object.freeze({ port, clientOrigin: parsedClientUrl.origin, nodeEnv: process.env.NODE_ENV ?? "development" });
+const mongoUri = process.env.MONGODB_URI?.trim() ?? "";
+const mongoDb = process.env.MONGODB_DB?.trim() || "rentdock";
+if (mongoUri && (!/^mongodb(?:\+srv)?:\/\//.test(mongoUri) || /<[^>]+>/.test(mongoUri))) throw new Error("MONGODB_URI must be a MongoDB connection string without placeholders.");
+if (/[\/\\.\s"$*<>:|?\x00]/.test(mongoDb) || Buffer.byteLength(mongoDb, "utf8") > 63) throw new Error("MONGODB_DB must be a valid database name of at most 63 bytes.");
+export const config = Object.freeze({ port, clientOrigin: parsedClientUrl.origin, nodeEnv: process.env.NODE_ENV ?? "development", mongoUri, mongoDb });
