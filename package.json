@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "check": "node --check src/app.js && node --check src/index.js && node --check src/config.js && node --check src/errors.js && node --check src/database.js && node --check src/database-probe.js && node --check src/database-diagnostics.js && node --check src/runtime.js && node --check scripts/check-database.mjs && node --check scripts/verify-foundation.mjs",
+    "check": "node scripts/check-source.mjs",
     "test": "node --test",
     "db:check": "node scripts/check-database.mjs",
     "db:verify": "node scripts/check-database.mjs --write",
-    "phase:verify": "node scripts/verify-foundation.mjs"
+    "phase:verify": "node scripts/verify-foundation.mjs",
+    "stripe:setup": "node scripts/setup-stripe-sandbox.mjs",
+    "stripe:check": "node scripts/check-stripe.mjs",
+    "stripe:verify": "node scripts/check-stripe.mjs"
   },
   "engines": {
     "node": ">=22.0.0"
