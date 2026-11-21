@@ -1,0 +1,174 @@
+[
+  {
+    "_id": "sony-a7-iv",
+    "name": "Mirrorless Camera Kit",
+    "category": "Photography",
+    "location": "Dhanmondi, Dhaka",
+    "price": 2500,
+    "rentalType": "Daily",
+    "image": "/images/camera.png",
+    "imageAlt": "Black mirrorless camera with a zoom lens",
+    "description": "A full-frame mirrorless camera kit for portraits, events and creative projects.",
+    "quantity": 2,
+    "availableQuantity": 2,
+    "condition": "Good",
+    "included": [
+      "Mirrorless camera body",
+      "Attached zoom lens"
+    ],
+    "terms": [
+      "Confirm the rental period, quantity and collection or delivery arrangements before handover.",
+      "Check the equipment condition and included accessories together at collection.",
+      "Follow the operating instructions provided by the equipment owner.",
+      "Return the equipment and included accessories at the agreed time."
+    ],
+    "status": "approved",
+    "ownerId": null,
+    "ownerName": "RentDock sample collection",
+    "isSample": true,
+    "featured": true
+  },
+  {
+    "_id": "cordless-drill",
+    "name": "Cordless Drill Kit",
+    "category": "Construction",
+    "location": "Mirpur, Dhaka",
+    "price": 450,
+    "rentalType": "Daily",
+    "image": "/images/drill.png",
+    "imageAlt": "Yellow and black cordless drill with battery and drill bits",
+    "description": "A portable cordless drill for furniture assembly and practical projects.",
+    "quantity": 4,
+    "availableQuantity": 4,
+    "condition": "Good",
+    "included": [
+      "Cordless drill",
+      "Rechargeable battery",
+      "Drill bits"
+    ],
+    "terms": [
+      "Confirm the rental period, quantity and collection or delivery arrangements before handover.",
+      "Check the equipment condition and included accessories together at collection.",
+      "Follow the operating instructions provided by the equipment owner.",
+      "Return the equipment and included accessories at the agreed time."
+    ],
+    "status": "approved",
+    "ownerId": null,
+    "ownerName": "RentDock sample collection",
+    "isSample": true,
+    "featured": true
+  },
+  {
+    "_id": "portable-projector",
+    "name": "Portable HD Projector",
+    "category": "Electronics",
+    "location": "Zindabazar, Sylhet",
+    "price": 1200,
+    "rentalType": "Daily",
+    "image": "/images/projector.png",
+    "imageAlt": "White portable projector with a glass lens",
+    "description": "Bring presentations, workshops and movie nights to a bigger screen.",
+    "quantity": 2,
+    "availableQuantity": 2,
+    "condition": "Good",
+    "included": [
+      "Portable projector"
+    ],
+    "terms": [
+      "Confirm the rental period, quantity and collection or delivery arrangements before handover.",
+      "Check the equipment condition and included accessories together at collection.",
+      "Follow the operating instructions provided by the equipment owner.",
+      "Return the equipment and included accessories at the agreed time."
+    ],
+    "status": "approved",
+    "ownerId": null,
+    "ownerName": "RentDock sample collection",
+    "isSample": true,
+    "featured": true
+  },
+  {
+    "_id": "pa-speaker",
+    "name": "Portable PA Speaker",
+    "category": "Events",
+    "location": "Agrabad, Chattogram",
+    "price": 3500,
+    "rentalType": "Weekly",
+    "image": "/images/speaker.png",
+    "imageAlt": "Black portable professional PA speaker",
+    "description": "Portable sound equipment for workshops and small gatherings.",
+    "quantity": 1,
+    "availableQuantity": 0,
+    "condition": "Good",
+    "included": [
+      "Portable PA speaker"
+    ],
+    "terms": [
+      "Confirm the rental period, quantity and collection or delivery arrangements before handover.",
+      "Check the equipment condition and included accessories together at collection.",
+      "Follow the operating instructions provided by the equipment owner.",
+      "Return the equipment and included accessories at the agreed time."
+    ],
+    "status": "approved",
+    "ownerId": null,
+    "ownerName": "RentDock sample collection",
+    "isSample": true,
+    "featured": true
+  },
+  {
+    "_id": "irrigation-pump",
+    "name": "Irrigation Water Pump",
+    "category": "Agriculture",
+    "location": "Shibganj, Bogura",
+    "price": 1800,
+    "rentalType": "Weekly",
+    "image": "/images/pump.png",
+    "imageAlt": "Red and white irrigation water pump in a protective metal frame",
+    "description": "A compact water pump for seasonal work and irrigation projects.",
+    "quantity": 2,
+    "availableQuantity": 2,
+    "condition": "Good",
+    "included": [
+      "Water pump",
+      "Protective frame"
+    ],
+    "terms": [
+      "Confirm the rental period, quantity and collection or delivery arrangements before handover.",
+      "Check the equipment condition and included accessories together at collection.",
+      "Follow the operating instructions provided by the equipment owner.",
+      "Return the equipment and included accessories at the agreed time."
+    ],
+    "status": "approved",
+    "ownerId": null,
+    "ownerName": "RentDock sample collection",
+    "isSample": true,
+    "featured": true
+  },
+  {
+    "_id": "cargo-van",
+    "name": "Compact Cargo Van",
+    "category": "Vehicles & Transportation",
+    "location": "Uttara, Dhaka",
+    "price": 45000,
+    "rentalType": "Monthly",
+    "image": "/images/van.png",
+    "imageAlt": "Compact white cargo delivery van",
+    "description": "A practical cargo vehicle for equipment and supply transport.",
+    "quantity": 1,
+    "availableQuantity": 1,
+    "condition": "Good",
+    "included": [
+      "Compact cargo van"
+    ],
+    "terms": [
+      "Confirm the rental period, quantity and collection or delivery arrangements before handover.",
+      "Check the equipment condition and included accessories together at collection.",
+      "Follow the operating instructions provided by the equipment owner.",
+      "Return the equipment and included accessories at the agreed time."
+    ],
+    "status": "approved",
+    "ownerId": null,
+    "ownerName": "RentDock sample collection",
+    "isSample": true,
+    "featured": true
+  }
+]

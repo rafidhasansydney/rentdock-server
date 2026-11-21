@@ -14,7 +14,9 @@
     "auth:verify": "node scripts/verify-authentication.mjs",
     "stripe:setup": "node scripts/setup-stripe-sandbox.mjs",
     "stripe:check": "node scripts/check-stripe.mjs",
-    "stripe:verify": "node scripts/check-stripe.mjs"
+    "stripe:verify": "node scripts/check-stripe.mjs",
+    "catalog:seed": "node scripts/seed-catalog.mjs",
+    "catalog:verify": "node scripts/verify-catalog.mjs"
   },
   "engines": {
     "node": ">=22.0.0"
