@@ -23,12 +23,18 @@ function verifySession(session) {
 export function createStripeTestClient({ key, request = fetch }) {
   if (!isStripeTestKey(key)) throw new Error("Configure a Stripe sandbox test key first. Live keys are not accepted by this diagnostic.");
 
+  function redact(value) {
+    return String(value ?? "").split(key).join("[redacted]")
+      .replace(/(?:sk|rk|rkcs|pk)_(?:test|live)_[A-Za-z0-9]+/g, "[redacted]")
+      .replace(/[\x00-\x1f\x7f]/g, " ").slice(0, 600);
+  }
+
   async function call(path, body) {
     let response;
     try {
       response = await request(`https://api.stripe.com/v1/${path}`, {
         method: body ? "POST" : "GET",
-        headers: { Authorization: `Bearer ${key}`, ...(body ? { "Content-Type": "application/x-www-form-urlencoded" } : {}) },
+        headers: { Authorization: `Bearer ${key}`, "Stripe-Version": "2026-11-18.endive", ...(body ? { "Content-Type": "application/x-www-form-urlencoded" } : {}) },
         body,
         signal: AbortSignal.timeout(15000),
         redirect: "error",
@@ -36,14 +42,20 @@ export function createStripeTestClient({ key, request = fetch }) {
     } catch {
       throw new Error("Stripe API could not be reached. Check network access from the normal Windows terminal.");
     }
-    if (!response.ok) throw new Error(`Stripe API rejected the test request (HTTP ${response.status}). Check test-key validity, sandbox expiry and Checkout permissions.`);
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      const details = payload?.error;
+      const fields = [details?.type, details?.code, details?.param].filter(Boolean).map(redact);
+      const reason = details?.message ? redact(details.message) : "No structured error details were returned.";
+      throw new Error(`Stripe API rejected the test request (HTTP ${response.status}). ${fields.join("; ")}\nStripe reason: ${reason}`);
+    }
     return response.json();
   }
 
   async function createCheckout() {
     const body = new URLSearchParams({
       mode: "payment",
-      "payment_method_types[0]": "card",
+      "allowed_payment_method_types[0]": "card",
       "line_items[0][quantity]": "1",
       "line_items[0][price_data][currency]": "usd",
       "line_items[0][price_data][unit_amount]": "100",
