@@ -15,7 +15,7 @@ export function createDatabaseService({ uri, name, createClient = (value, option
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 10000,
         connectTimeoutMS: 10000,
-        timeoutMS: 5000,
+        socketTimeoutMS: 10000,
       });
       client = candidate;
       connection = Promise.resolve().then(async () => {
@@ -35,7 +35,7 @@ export function createDatabaseService({ uri, name, createClient = (value, option
 
   async function ping() {
     const database = await connect();
-    await database.command({ ping: 1 }, { timeoutMS: 3000 });
+    await database.command({ ping: 1, maxTimeMS: 3000 });
   }
 
   function close() {

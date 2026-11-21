@@ -4,6 +4,25 @@ import { createDatabaseService } from "../src/database.js";
 import { describeDatabaseFailure } from "../src/database-diagnostics.js";
 import { verifyDatabaseRoundTrip } from "../src/database-probe.js";
 
+test("connection settings are accepted by the installed MongoDB driver without obsolete-timeout warnings", async () => {
+  const { MongoClient } = await import("mongodb");
+  const warnings = [];
+  const collect = warning => { if (/timeoutMS/.test(warning.message)) warnings.push(warning.message); };
+  process.on("warning", collect);
+  const service = createDatabaseService({ uri: "mongodb://127.0.0.1:27017", name: "rentdock", createClient: (uri, options) => {
+    const actualClient = new MongoClient(uri, options);
+    return { connect: async () => {}, close: () => actualClient.close(), db: () => ({ command: async () => ({ ok: 1 }) }) };
+  } });
+  try {
+    await service.connect();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(warnings, []);
+  } finally {
+    await service.close();
+    process.off("warning", collect);
+  }
+});
+
 test("concurrent database callers share a pool; close permits a fresh connection", async () => {
   let created = 0;
   let closed = 0;
