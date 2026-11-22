@@ -15,7 +15,7 @@ Open the Checkout URL printed by `stripe:check`. It creates a USD 1 sandbox test
 
 After completing Checkout, run the exact `stripe:verify` command printed by the diagnostic. It retrieves the same Checkout Session directly from Stripe and checks test mode, amount, currency, metadata, paid state and completion. A redirect alone does not establish successful payment. The localhost return page need not be running for the server-side verification to work.
 
-The full rental payment phase still needs authentication, trusted pricing, atomic date inventory, a hosted Checkout redirect, signed webhooks, retry-safe booking/payment persistence, cancellation/expiry handling and deployed end-to-end testing. Do not expose these diagnostic commands as public API endpoints.
+The application rental integration is separate from this USD 1 diagnostic. See booking-testing.md for BDT Checkout, date inventory, signed notifications and persisted bookings/payments. Local end-to-end rental payment was verified on 22 November 2026; deployed verification remains pending. Do not expose these diagnostic commands as public API endpoints.
 
 References verified 21 November 2026:
 

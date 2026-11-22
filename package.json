@@ -18,7 +18,12 @@
     "catalog:seed": "node scripts/seed-catalog.mjs",
     "catalog:verify": "node scripts/verify-catalog.mjs",
     "owner:verify": "node scripts/verify-owner.mjs",
-    "images:check": "node scripts/check-images.mjs"
+    "images:check": "node scripts/check-images.mjs",
+    "booking:verify": "node scripts/verify-bookings.mjs",
+    "stripe:rental-check": "node scripts/check-rental-stripe.mjs",
+    "stripe:listen": "node scripts/listen-stripe.mjs",
+    "booking:demo": "node scripts/seed-booking-demo.mjs",
+    "booking:report": "node scripts/report-booking-payment.mjs"
   },
   "engines": {
     "node": ">=22.0.0"

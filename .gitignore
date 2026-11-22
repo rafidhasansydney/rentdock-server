@@ -4,3 +4,4 @@ node_modules/
 *.log
 .vercel/
 .stripe-sandbox.json
+.booking-demo.json

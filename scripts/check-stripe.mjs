@@ -7,7 +7,7 @@ try {
   if (id) {
     const session = await client.verifyPayment(id);
     console.log(`Stripe verified the sandbox payment: ${session.id}; USD 1.00; paid and complete.`);
-    console.log("This verifies a provider test payment only. Rental booking, webhook finalization and payment persistence are separate pending features.");
+    console.log("This verifies the isolated provider test only. Use booking:report to verify an application rental, its stored booking/payment and live webhook.");
   } else {
     const session = await client.createCheckout();
     console.log("Stripe test Checkout created for USD 1.00. This is an isolated provider test, not a rental booking or the final marketplace currency.");
