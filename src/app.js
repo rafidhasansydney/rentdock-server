@@ -7,8 +7,12 @@ import { toNodeHandler } from "better-auth/node";
 import { createAccountRoutes } from "./auth/routes.js";
 import { createCatalogRepository } from "./catalog/repository.js";
 import { createCatalogRoutes } from "./catalog/routes.js";
+import { createOwnerRepository } from "./owner/repository.js";
+import { createOwnerRoutes } from "./owner/routes.js";
+import { createImageUploadService } from "./uploads/service.js";
+import { createImageRoutes } from "./uploads/routes.js";
 
-export function createApp({ database = databaseService, isShuttingDown = () => false, authentication, catalog = createCatalogRepository(database) } = {}) {
+export function createApp({ database = databaseService, isShuttingDown = () => false, authentication, catalog = createCatalogRepository(database), owner = createOwnerRepository(database), uploads } = {}) {
   const app = express();
   const settings = authentication?.settings ?? config;
   app.disable("x-powered-by");
@@ -28,6 +32,8 @@ export function createApp({ database = databaseService, isShuttingDown = () => f
   });
   if (authentication) app.all("/api/auth/{*splat}", toNodeHandler(authentication.auth));
   app.use(express.json({ limit: "100kb" }));
+  app.use("/api", createImageRoutes({ uploads: uploads ?? createImageUploadService({ database, settings }), authentication }));
+  if (authentication) app.use("/api", createOwnerRoutes({ owner, authentication }));
   app.use("/api", createCatalogRoutes({ catalog, authentication }));
   if (authentication) app.use("/api", createAccountRoutes({ auth: authentication.auth, settings: authentication.settings }));
   app.get("/api/health", (req, res) => {

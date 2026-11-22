@@ -14,6 +14,7 @@ export function createCatalogRepository(database) {
       await Promise.all([
         equipment.createIndex({ status: 1, createdAt: -1, _id: 1 }),
         equipment.createIndex({ status: 1, category: 1, price: 1 }),
+        equipment.createIndex({ ownerId: 1, status: 1, createdAt: -1 }),
         favorites.createIndex({ userId: 1, equipmentId: 1 }, { unique: true }),
       ]);
     },

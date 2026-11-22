@@ -20,4 +20,5 @@ if (authSecret && authSecret.length < 32) throw new Error("BETTER_AUTH_SECRET mu
 const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
 if (Boolean(googleClientId) !== Boolean(googleClientSecret)) throw new Error("Configure both GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, or leave both empty.");
-export const config = Object.freeze({ port, host, clientOrigin: parsedClientUrl.origin, nodeEnv: process.env.NODE_ENV ?? "development", mongoUri, mongoDb, authBaseUrl, authSecret, googleClientId, googleClientSecret });
+const imgbbApiKey = process.env.IMGBB_API_KEY?.trim() ?? "";
+export const config = Object.freeze({ port, host, clientOrigin: parsedClientUrl.origin, nodeEnv: process.env.NODE_ENV ?? "development", mongoUri, mongoDb, authBaseUrl, authSecret, googleClientId, googleClientSecret, imgbbApiKey });

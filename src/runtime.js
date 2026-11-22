@@ -4,6 +4,7 @@ import { config } from "./config.js";
 import { databaseService } from "./database.js";
 import { createAuthentication } from "./auth/authentication.js";
 import { createCatalogRepository } from "./catalog/repository.js";
+import { createImageUploadService } from "./uploads/service.js";
 
 export async function startServer({ database = databaseService, port = config.port, host = config.host, drainTimeoutMS = 5000, authenticationFactory = createAuthentication } = {}) {
   let shuttingDown = false;
@@ -11,14 +12,16 @@ export async function startServer({ database = databaseService, port = config.po
   const connectedDatabase = await database.connect();
   let authentication;
   const catalog = createCatalogRepository(database);
+  const uploads = createImageUploadService({ database, settings: config });
   try {
     authentication = authenticationFactory ? await authenticationFactory({ database: connectedDatabase, client: database.getClient?.() }) : undefined;
     if (connectedDatabase?.collection) await catalog.ensureIndexes();
+    if (connectedDatabase?.collection) await uploads.ensureIndexes();
   } catch (error) {
     await database.close();
     throw error;
   }
-  const server = createServer(createApp({ database, authentication, catalog, isShuttingDown: () => shuttingDown }));
+  const server = createServer(createApp({ database, authentication, catalog, uploads, isShuttingDown: () => shuttingDown }));
   try {
     await new Promise((resolve, reject) => {
       server.once("error", reject);
