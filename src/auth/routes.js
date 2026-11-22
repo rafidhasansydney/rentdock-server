@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { createAuthorization } from "../middleware/authorization.js";
 import { profileError, publicUser } from "./policy.js";
+import { mountAdminPasswordRoutes } from "./password-routes.js";
 
 export function createAccountRoutes({ auth, settings }) {
   const router = Router();
   const permissions = createAuthorization({ auth, settings });
   router.use(["/profile", "/dashboard"], permissions.verifyToken);
+  mountAdminPasswordRoutes(router, auth, permissions);
   router.get("/profile", (req, res) => res.json({ user: req.user }));
   router.patch("/profile", async (req, res) => {
     const fields = ["name", "image", "phone", "address"];

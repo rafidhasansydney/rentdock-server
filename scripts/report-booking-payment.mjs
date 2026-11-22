@@ -5,12 +5,16 @@ import { databaseService } from "../src/database.js";
 import { createRentalStripe, verifyRentalSession } from "../src/bookings/stripe.js";
 import { describeDatabaseFailure } from "../src/database-diagnostics.js";
 try {
+  const args = process.argv.slice(2);
+  if (args.length && (args.length !== 1 || args[0] !== "--deployed")) throw new Error("Use booking:report with no arguments, or --deployed for the live demo Customer.");
+  const deployed = args[0] === "--deployed";
   const demo = JSON.parse(readFileSync(new URL("../.booking-demo.json", import.meta.url), "utf8"));
   const db = await databaseService.connect();
-  const attempt = await db.collection("checkoutAttempts").find({ equipmentId: demo.equipmentId, state: { $in: ["paid", "completed"] } }).sort({ paidAt: -1 }).limit(1).next();
+  const attempt = await db.collection("checkoutAttempts").find({ equipmentId: demo.equipmentId, state: { $in: ["paid", "completed"] }, ...(deployed ? { customerId: demo.customer?.id } : {}) }).sort({ paidAt: -1 }).limit(1).next();
   if (!attempt) { console.error("No verified paid rental was found for the demo listing yet. Complete the browser test, then retry."); process.exitCode = 1; }
   else {
     const session = verifyRentalSession(attempt, await createRentalStripe(config).retrieve(attempt.sessionId), { paid: true });
+    if (deployed) { assert.equal(new URL(session.success_url).origin, "https://rentdock-client.vercel.app"); console.log("PASS this demo Customer payment used the deployed RentDock return URL."); }
     const booking = await db.collection("bookings").findOne({ _id: attempt._id, customerId: attempt.customerId });
     const payment = await db.collection("payments").findOne({ _id: session.id, bookingId: attempt._id });
     assert.ok(booking && payment);
@@ -22,7 +26,7 @@ try {
     console.log(`PASS real Stripe sandbox payment: BDT ${(attempt.amountMinor / 100).toFixed(2)}; paid and complete.`);
     console.log("PASS exactly one matching booking and payment are persisted in MongoDB.");
     if (attempt.lastWebhookAt instanceof Date) console.log("PASS live signed Stripe webhook processed and recorded for this rental.");
-    else { console.error("Payment is saved, but its live webhook has not been recorded yet. Keep the listener open and retry this report."); process.exitCode = 1; }
+    else { console.error("Payment is saved, but its signed webhook has not been recorded yet. Check hosted delivery, or the listener if testing locally, then retry this report."); process.exitCode = 1; }
     console.log(`Booking reference: ${attempt._id}`);
   }
 } catch (error) {
