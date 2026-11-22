@@ -11,10 +11,16 @@ import { createOwnerRepository } from "./owner/repository.js";
 import { createOwnerRoutes } from "./owner/routes.js";
 import { createImageUploadService } from "./uploads/service.js";
 import { createImageRoutes } from "./uploads/routes.js";
+import { createBookingRepository } from "./bookings/repository.js";
+import { createBookingService } from "./bookings/service.js";
+import { createRentalStripe } from "./bookings/stripe.js";
+import { createBookingRoutes, createWebhookRoutes } from "./bookings/routes.js";
 
-export function createApp({ database = databaseService, isShuttingDown = () => false, authentication, catalog = createCatalogRepository(database), owner = createOwnerRepository(database), uploads } = {}) {
+export function createApp({ database = databaseService, isShuttingDown = () => false, authentication, catalog = createCatalogRepository(database), owner = createOwnerRepository(database), uploads, bookings, gateway } = {}) {
   const app = express();
   const settings = authentication?.settings ?? config;
+  gateway ??= createRentalStripe(settings);
+  bookings ??= createBookingService({ repository: createBookingRepository(database), gateway });
   app.disable("x-powered-by");
   app.use(cors({
     origin(origin, callback) {
@@ -31,7 +37,9 @@ export function createApp({ database = databaseService, isShuttingDown = () => f
     res.json({ available: Boolean(authentication), google: Boolean(authentication?.googleEnabled) });
   });
   if (authentication) app.all("/api/auth/{*splat}", toNodeHandler(authentication.auth));
+  app.use("/api", createWebhookRoutes({ bookings, gateway }));
   app.use(express.json({ limit: "100kb" }));
+  if (authentication) app.use("/api", createBookingRoutes({ bookings, authentication }));
   app.use("/api", createImageRoutes({ uploads: uploads ?? createImageUploadService({ database, settings }), authentication }));
   if (authentication) app.use("/api", createOwnerRoutes({ owner, authentication }));
   app.use("/api", createCatalogRoutes({ catalog, authentication }));

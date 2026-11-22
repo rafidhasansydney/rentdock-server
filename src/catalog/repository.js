@@ -39,7 +39,7 @@ export function createCatalogRepository(database) {
       const record = await equipment.findOne({ _id: id, status: "approved" });
       if (!record) return null;
       const card = publicEquipment(Object.fromEntries(Object.keys(cardProjection).filter(key => Object.hasOwn(record, key)).map(key => [key, record[key]])));
-      return { ...card, quantity: record.availableQuantity, condition: record.condition, included: record.included ?? [], terms: record.terms ?? [], owner: { name: record.ownerName || "Equipment owner" } };
+      return { ...card, quantity: record.quantity ?? record.availableQuantity, bookable: !record.isSample && Boolean(record.ownerId), condition: record.condition, included: record.included ?? [], terms: record.terms ?? [], owner: { name: record.ownerName || "Equipment owner" } };
     },
     async addFavorite(userId, equipmentId) {
       const { equipment, favorites } = await collections();

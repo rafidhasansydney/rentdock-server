@@ -21,4 +21,7 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
 if (Boolean(googleClientId) !== Boolean(googleClientSecret)) throw new Error("Configure both GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, or leave both empty.");
 const imgbbApiKey = process.env.IMGBB_API_KEY?.trim() ?? "";
-export const config = Object.freeze({ port, host, clientOrigin: parsedClientUrl.origin, nodeEnv: process.env.NODE_ENV ?? "development", mongoUri, mongoDb, authBaseUrl, authSecret, googleClientId, googleClientSecret, imgbbApiKey });
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim() ?? "";
+if (stripeSecretKey && !/^(sk|rk|rkcs)_test_[A-Za-z0-9]+$/.test(stripeSecretKey)) throw new Error("RentDock currently accepts Stripe test keys only.");
+export const config = Object.freeze({ port, host, clientOrigin: parsedClientUrl.origin, nodeEnv: process.env.NODE_ENV ?? "development", mongoUri, mongoDb, authBaseUrl, authSecret, googleClientId, googleClientSecret, imgbbApiKey, stripeSecretKey, stripeWebhookSecret });
