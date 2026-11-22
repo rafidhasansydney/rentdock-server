@@ -6,6 +6,8 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("PORT m
 const clientUrl = process.env.CLIENT_URL ?? "http://127.0.0.1:3000";
 const parsedClientUrl = new URL(clientUrl);
 if (!["http:", "https:"].includes(parsedClientUrl.protocol)) throw new Error("CLIENT_URL must be an HTTP or HTTPS URL.");
+if (parsedClientUrl.username || parsedClientUrl.password || parsedClientUrl.pathname !== "/" || parsedClientUrl.search || parsedClientUrl.hash) throw new Error("CLIENT_URL must be the frontend origin without a path or credentials.");
+if (process.env.VERCEL && (parsedClientUrl.protocol !== "https:" || ["localhost", "127.0.0.1", "[::1]"].includes(parsedClientUrl.hostname))) throw new Error("Set CLIENT_URL to the deployed HTTPS RentDock client before deploying the server.");
 const host = process.env.HOST?.trim() || (process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1");
 if (!["127.0.0.1", "0.0.0.0", "::1", "::"].includes(host)) throw new Error("HOST must be a supported local or wildcard bind address.");
 const mongoUri = process.env.MONGODB_URI?.trim() ?? "";

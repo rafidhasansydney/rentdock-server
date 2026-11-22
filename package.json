@@ -28,7 +28,7 @@
     "admin:verify": "node scripts/verify-administration.mjs"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": "22.x"
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "1.7.27",

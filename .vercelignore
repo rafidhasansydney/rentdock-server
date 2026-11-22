@@ -1,0 +1,8 @@
+.env*
+.booking-demo.json
+.stripe-sandbox.json
+*.log
+test/
+docs/
+scripts/
+data/

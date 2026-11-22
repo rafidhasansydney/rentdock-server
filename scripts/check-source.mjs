@@ -15,5 +15,7 @@ function check(directory) {
     }
   }
 }
+execFileSync(process.execPath, ["--check", resolve(root, "app.js")], { stdio: "inherit" });
+checked++;
 for (const directory of ["src", "scripts", "test"]) check(resolve(root, directory));
 console.log(`Syntax checked ${checked} server source, diagnostic and test files.`);
