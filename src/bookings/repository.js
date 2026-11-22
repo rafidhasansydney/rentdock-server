@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { activeStates, pendingStates, availableFor, rentalPrice, bookingError, bookingFingerprint, bookable, dhakaToday } from "./policy.js";
+import { databaseUserId, touchRole } from "../auth/storage.js";
 
 const overlap = input => ({ equipmentId: input.equipmentId, state: { $in: activeStates }, startDate: { $lte: input.endDate }, endDate: { $gte: input.startDate } });
 export function publicAttempt(row) { return { id: row._id, equipmentId: row.equipmentId, equipmentName: row.equipmentName, startDate: row.startDate, endDate: row.endDate, quantity: row.quantity, amountMinor: row.amountMinor, currency: row.currency, state: row.state, expiresAt: row.expiresAt, checkoutUrl: row.state === "open" ? row.checkoutUrl : undefined }; }
-export function publicRental(row, today = dhakaToday()) { const { _id, customerId, ownerId, attemptId, ...details } = row; void customerId; void ownerId; void attemptId; return { ...details, id: _id, bookingStatus: row.bookingStatus === "confirmed" && row.startDate <= today ? (row.endDate < today ? "completed" : "ongoing") : row.bookingStatus }; }
+export function publicRental(row, today = dhakaToday()) { const { _id, customerId, ownerId, attemptId, adminNote, adminVersion, managedAt, managedBy, ...details } = row; void customerId; void ownerId; void attemptId; void adminNote; void adminVersion; void managedAt; void managedBy; return { ...details, id: _id, bookingStatus: ["confirmed", "ongoing"].includes(row.bookingStatus) && row.startDate <= today ? (row.endDate < today ? "completed" : "ongoing") : row.bookingStatus }; }
 
 export function createBookingRepository(database, { clock = () => new Date() } = {}) {
   async function db() { return database.connect(); }
@@ -36,6 +37,7 @@ export function createBookingRepository(database, { clock = () => new Date() } =
       const connection = await db();
       const equipment = await connection.collection("equipment").findOne({ _id: input.equipmentId });
       if (!bookable(equipment)) throw bookingError("This listing is not available for booking. Choose approved equipment from an owner.", 409);
+      if (!await connection.collection("user").findOne({ _id: databaseUserId(equipment.ownerId), role: "owner", suspended: { $ne: true } }, { projection: { _id: 1 } })) throw bookingError("This Owner is currently unavailable for new rentals.", 409);
       const records = await connection.collection("checkoutAttempts").find(overlap(input)).toArray();
       return { ...rentalPrice(equipment, input), availableQuantity: availableFor(equipment.quantity, input, records), quoteVersion: equipment.version };
     },
@@ -46,6 +48,7 @@ export function createBookingRepository(database, { clock = () => new Date() } =
         try { return await transaction(async (connection, session) => {
           const attempts = connection.collection("checkoutAttempts");
           await connection.collection("bookingLocks").updateOne({ _id: user.id }, { $inc: { version: 1 }, $set: { updatedAt: now } }, { upsert: true, session });
+          if (!await touchRole(connection, session, user.id, "customer")) throw bookingError("Your Customer access changed. Sign in again.", 409);
           const existing = await attempts.findOne({ customerId: user.id, requestId: input.requestId }, { session });
           if (existing) { if (existing.fingerprint !== fingerprint) throw bookingError("This payment attempt belongs to different rental details. Review My rentals first.", 409); return existing; }
           if (await attempts.countDocuments({ customerId: user.id, state: { $in: pendingStates } }, { session }) >= 3) throw bookingError("Finish or cancel an existing checkout in My rentals before starting another.", 429);
@@ -53,6 +56,7 @@ export function createBookingRepository(database, { clock = () => new Date() } =
           if (await attempts.findOne({ customerId: user.id, equipmentId: input.equipmentId, state: { $in: pendingStates } }, { session })) throw bookingError("You already have a checkout for this equipment. Resume or cancel it in My rentals.", 409);
           const equipment = await lockEquipment(connection, session, input.equipmentId, 1);
           if (!bookable(equipment) || equipment.ownerId === user.id || equipment.version !== input.quoteVersion) throw bookingError("This listing changed. Review its latest price and availability.", 409);
+          if (!await touchRole(connection, session, equipment.ownerId, "owner")) throw bookingError("This Owner is currently unavailable for new rentals.", 409);
           const records = await attempts.find(overlap(input), { session }).toArray();
           if (input.quantity > availableFor(equipment.quantity, input, records)) throw bookingError("That quantity is no longer available for these dates. Choose fewer items or different dates.", 409);
           const attempt = { _id: id, ...input, ...rentalPrice(equipment, input), fingerprint, customerId: user.id, customerName: user.name, customerEmail: user.email, ownerId: equipment.ownerId, ownerName: equipment.ownerName, equipmentName: equipment.name, state: "creating", expiresAt: new Date(now.getTime() + 35 * 60000), createdAt: now };

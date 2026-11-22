@@ -21,7 +21,7 @@ test("repository assigns identity and Pending status and guards mutations by own
     updateOne: async query => { queries.push({ query }); return { modifiedCount: 0 }; },
     findOne: async query => { queries.push({ query }); return query.ownerId === "owner-1" ? record : null; },
   };
-  const owner = createOwnerRepository({ connect: async () => ({ collection: () => collection }) });
+  const owner = createOwnerRepository({ connect: async () => ({ collection: name => name === "user" ? { findOneAndUpdate: async () => ({ name: "Owner", email: "owner@example.test" }) } : collection }), getClient: () => ({ startSession: () => ({ withTransaction: action => action(), endSession: async () => {} }) }) });
   const saved = await owner.create({ id: "owner-1", name: "Owner", email: "owner@example.test" }, input);
   assert.equal(saved.status, "pending");
   assert.equal(saved.ownerId, "owner-1");

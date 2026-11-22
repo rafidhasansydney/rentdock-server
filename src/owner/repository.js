@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { listingStatuses } from "./policy.js";
+import { touchRole } from "../auth/storage.js";
 const owned = (ownerId, id) => ({ ownerId, ...(id ? { _id: id } : {}), status: { $in: listingStatuses } });
 export function ownerEquipment(record) {
   const { _id, ownerEmail, activeRentalCount, ...item } = record;
@@ -24,10 +25,18 @@ export function createOwnerRepository(database) {
     },
     async get(ownerId, id) { const record = await (await collection()).findOne(owned(ownerId, id)); return record ? ownerEquipment(record) : null; },
     async create(user, input) {
-      const now = new Date();
-      const record = { ...input, _id: randomUUID(), availableQuantity: input.quantity, activeRentalCount: 0, status: "pending", ownerId: user.id, ownerName: user.name, ownerEmail: user.email, imageAlt: input.name, version: 1, isSample: false, createdAt: now, updatedAt: now };
-      await (await collection()).insertOne(record);
-      return ownerEquipment(record);
+      const db = await database.connect(), client = database.getClient?.();
+      if (!client) throw new Error("Owner storage is unavailable.");
+      const session = client.startSession();
+      try { return await session.withTransaction(async () => {
+        const current = await touchRole(db, session, user.id, "owner");
+        if (!current) throw new Error("Owner access changed.");
+        const now = new Date();
+        const record = { ...input, _id: randomUUID(), availableQuantity: input.quantity, activeRentalCount: 0, status: "pending", ownerId: user.id, ownerName: current.name, ownerEmail: current.email, imageAlt: input.name, version: 1, isSample: false, createdAt: now, updatedAt: now };
+        await db.collection("equipment").insertOne(record, { session });
+        return ownerEquipment(record);
+      }, { readConcern: { level: "snapshot" }, writeConcern: { w: "majority" } }); }
+      finally { await session.endSession(); }
     },
     async update(ownerId, id, input) {
       const equipment = await collection();

@@ -15,8 +15,11 @@ import { createBookingRepository } from "./bookings/repository.js";
 import { createBookingService } from "./bookings/service.js";
 import { createRentalStripe } from "./bookings/stripe.js";
 import { createBookingRoutes, createWebhookRoutes } from "./bookings/routes.js";
+import { createAdministrationRepository } from "./admin/repository.js";
+import { createAnalyticsRepository } from "./admin/analytics.js";
+import { createAdministrationRoutes } from "./admin/routes.js";
 
-export function createApp({ database = databaseService, isShuttingDown = () => false, authentication, catalog = createCatalogRepository(database), owner = createOwnerRepository(database), uploads, bookings, gateway } = {}) {
+export function createApp({ database = databaseService, isShuttingDown = () => false, authentication, catalog = createCatalogRepository(database), owner = createOwnerRepository(database), uploads, bookings, gateway, administration = createAdministrationRepository(database), analytics = createAnalyticsRepository(database) } = {}) {
   const app = express();
   const settings = authentication?.settings ?? config;
   gateway ??= createRentalStripe(settings);
@@ -39,6 +42,7 @@ export function createApp({ database = databaseService, isShuttingDown = () => f
   if (authentication) app.all("/api/auth/{*splat}", toNodeHandler(authentication.auth));
   app.use("/api", createWebhookRoutes({ bookings, gateway }));
   app.use(express.json({ limit: "100kb" }));
+  if (authentication) app.use("/api", createAdministrationRoutes({ administration, analytics, authentication }));
   if (authentication) app.use("/api", createBookingRoutes({ bookings, authentication }));
   app.use("/api", createImageRoutes({ uploads: uploads ?? createImageUploadService({ database, settings }), authentication }));
   if (authentication) app.use("/api", createOwnerRoutes({ owner, authentication }));
