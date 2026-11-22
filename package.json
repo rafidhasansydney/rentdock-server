@@ -16,7 +16,9 @@
     "stripe:check": "node scripts/check-stripe.mjs",
     "stripe:verify": "node scripts/check-stripe.mjs",
     "catalog:seed": "node scripts/seed-catalog.mjs",
-    "catalog:verify": "node scripts/verify-catalog.mjs"
+    "catalog:verify": "node scripts/verify-catalog.mjs",
+    "owner:verify": "node scripts/verify-owner.mjs",
+    "images:check": "node scripts/check-images.mjs"
   },
   "engines": {
     "node": ">=22.0.0"
