@@ -60,7 +60,7 @@ Demonstration equipment is clearly labelled and does not promise real delivery. 
 - Prior Atlas live verification passed isolated authentication/profile/RBAC, catalog/favorites, Owner management, transactional booking concurrency and Admin management/analytics, including cleanup of its temporary data.
 - The user verified Google Admin login and email/password Admin login on the deployed site.
 - The earlier real BDT 200 sandbox payment was verified through Stripe, MongoDB and a local signed webhook. A separately signed unrelated probe also proved the hosted webhook accepts the configured production signature without changing booking data.
-- **Final hosted browser payment evidence remains pending** until `npm run booking:report -- --deployed` confirms a fresh demo Customer payment, its production return URL, exactly one persisted booking/payment and a recorded signed webhook while the local forwarder is stopped.
+- **Final hosted browser payment passed on 23 November 2026.** The user supplied the production confirmation screenshot and the successful `npm run booking:report -- --deployed` output. The report verified the production return URL, a real Stripe sandbox BDT 200 paid/complete payment, exactly one matching MongoDB booking/payment and the recorded signed webhook. Booking reference: `7c4cd392-0f7e-4195-8bf7-1ee0183aea64`. The local forwarder was instructed to remain stopped for this hosted test.
 
 Browser automation timed out during this final review; current visual behavior is therefore not reported as a fresh automated browser pass. The linked Google Drive requirement video was not accessible from the review environment, so this document covers the written specification.
 
@@ -75,7 +75,7 @@ Browser automation timed out during this final review; current visual behavior i
 
 ## Before submission
 
-1. Finish the fresh deployed Stripe test and save its report.
+1. Hosted Stripe payment and persistence verification are complete; retain the successful report and confirmation screenshot.
 2. Confirm both final GitHub heads have READY production deployments.
 3. Provide the verified Admin email/password privately with the live website and both repository links.
 4. Keep the Stripe sandbox credentials valid through evaluation; update the hosted test key and matching webhook secret if that sandbox expires.
