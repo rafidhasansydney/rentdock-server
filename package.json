@@ -25,7 +25,8 @@
     "booking:demo": "node scripts/seed-booking-demo.mjs",
     "booking:report": "node scripts/report-booking-payment.mjs",
     "admin:setup": "node scripts/setup-admin.mjs",
-    "admin:verify": "node scripts/verify-administration.mjs"
+    "admin:verify": "node scripts/verify-administration.mjs",
+    "catalog:submission": "node scripts/seed-submission-catalog.mjs"
   },
   "engines": {
     "node": "22.x"
